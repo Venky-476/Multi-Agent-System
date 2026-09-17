@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  docker-build-check:
+    name: Docker Build Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build service image
+        run: docker build -f docker/Dockerfile.service -t multi-agent-orchestration-service:ci .
+
+      - name: Build app image
+        run: docker build -f docker/Dockerfile.app -t multi-agent-orchestration-app:ci .
